@@ -3,7 +3,6 @@
  */
 
 export interface ICountryProps {
-    id?: number;
     code: string;
     name: string;
     populationSize: number;
@@ -12,7 +11,6 @@ export interface ICountryProps {
 }
 
 export class Country implements ICountryProps {
-    id?: number;
     code: string;
     name: string;
     populationSize: number;

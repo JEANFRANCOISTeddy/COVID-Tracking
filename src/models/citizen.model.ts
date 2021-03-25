@@ -1,11 +1,15 @@
+/**
+ * Citizen class
+ */
+
 export interface ICitizenProps {
     id?: number;
-    socialSecurityCardId: string; // check if your a citizen in using numbers on your social security card
-    lastName: string;
-    firstName: string;
-    age: number;
-    gender: string;
-    nationality: string;
+    socialSecurityCardId: string | undefined; // check if your a citizen in using numbers on your social security card
+    lastName: string | undefined;
+    firstName: string | undefined;
+    age: number | undefined;
+    gender: string | undefined;
+    nationality: string | undefined;
     covidResult?: string; // positive or negative
     vaccinationArray?: Array<object>; // store two vaccine certification objects
     vaccinationAvailability?: string; // choose a date to make your injection
@@ -14,15 +18,15 @@ export interface ICitizenProps {
 export class Citizen implements ICitizenProps {
 
     id?: number;
-    socialSecurityCardId: string; // check if your a citizen in using numbers on your social security card
-    lastName: string;
-    firstName: string;
-    age: number;
-    gender: string;
-    nationality: string;
-    covidResult?: string; // positive or negative
-    vaccinationArray?: Array<object>; // store two vaccine certification objects
-    vaccinationAvailability?: string; // choose a date to make your injection
+    socialSecurityCardId: string | undefined;
+    lastName: string | undefined;
+    firstName: string | undefined;
+    age: number | undefined;
+    gender: string | undefined;
+    nationality: string | undefined;
+    covidResult?: string;
+    vaccinationArray?: Array<object>;
+    vaccinationAvailability?: string;
 
     /**
      *
@@ -53,7 +57,7 @@ export class Citizen implements ICitizenProps {
      * @param socialSecurityCardId - a string of your social security card id
      * @returns - true if valid, no if invalid
      */
-    async validateSocialSecurityCard(socialSecurityCardId: string): Promise<boolean> {
+    async validateSocialSecurityCard(socialSecurityCardId: string | undefined): Promise<boolean> {
         if (socialSecurityCardId) {
             return true;
         }

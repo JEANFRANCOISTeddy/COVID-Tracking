@@ -2,7 +2,6 @@ import {Context, Contract} from "fabric-contract-api";
 import {Country, ICountryProps} from "../models/country.model";
 
 const chalk = require('chalk');
-const SHA256  = require('crypto-js/sha256');
 
 export class CountryContract extends Contract {
 
@@ -14,7 +13,7 @@ export class CountryContract extends Contract {
      *
      * @param ctx
      */
-    public async  initLedger(ctx: Context) {
+    public async initLedger(ctx: Context){
         console.info(chalk.blue('============= START : Initialize Ledger ==========='));
 
         const countries: Country[] = [
@@ -44,13 +43,12 @@ export class CountryContract extends Contract {
             },
         ];
 
-        countries.forEach(function (country, index) {
-            // Assign random id by using sha256 hash function
-            countries[index].id = SHA256(Math.floor(Math.random() * Date.now()));
+        for (const country of countries) {
+            let index = countries.indexOf(country);
             // It contains a key and value which needs to be written to the transaction's write set.
-            await ctx.stub.putState('COUNTRY' + index, Buffer.from(JSON.stringify(countries[index])));
+            await ctx.stub.putState(countries[index].code, Buffer.from(JSON.stringify(countries[index])));
             console.info('Added <--> ', countries[index]);
-        });
+        }
 
         console.info(chalk.blue('============= END : Initialize Ledger ==========='));
     }
@@ -64,11 +62,10 @@ export class CountryContract extends Contract {
      * @param ctx
      * @param props - Country object
      */
-    public async addCountry(ctx: Context, props: ICountryProps) {
+    public async addCountry(ctx: Context, props: ICountryProps){
         console.info(chalk.green('============= START : Create Country ==========='));
 
-        const randomId = SHA256(Math.floor(Math.random() * Date.now()));
-        await ctx.stub.putState(randomId, Buffer.from(JSON.stringify(props)));
+        await ctx.stub.putState(props.code, Buffer.from(JSON.stringify(props)));
 
         console.info(chalk.green('============= END : Create Country ==========='));
     }
@@ -92,4 +89,7 @@ export class CountryContract extends Contract {
         return countryAsBytes.toString();
     }
 
+    public async sendDoses() {
+        
+    }
 }
