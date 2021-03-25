@@ -1,5 +1,5 @@
-import {Country, Citizen, Laboratory,  Doctor, VaccinationPoint} from './src/models'
-import {CountryContract, CitizenContract, LaboratoryContract, DoctorContract, VaccinationPointContract } from './src/contracts'
+import {Country, Citizen, Laboratory,  Doctor, VaccinationPoint} from '../src/models'
+import {CountryContract, CitizenContract, LaboratoryContract, DoctorContract, VaccinationPointContract } from '../src/contracts'
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
