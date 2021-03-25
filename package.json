@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/JEANFRANCOISTeddy/COVID-Tracking#readme",
   "dependencies": {
+    "chalk": "^4.1.0",
     "crypto-js": "^4.0.0",
     "fabric-contract-api": "^2.2.1",
     "fabric-shim": "^2.2.1",
