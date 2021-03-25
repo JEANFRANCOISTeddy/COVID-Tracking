@@ -25,6 +25,23 @@ export class CountryContract extends Contract {
         console.info(chalk.green('============= END : Create Country ==========='));
     }
 
-
+    /**
+     *
+     * queryCountry
+     *
+     * Get country from chaincode state
+     *
+     * @param ctx
+     * @returns - country object converted in string
+     */
+    public async queryCountry(ctx: Context, countryCode: string): Promise<string> {
+        // It contains a key which is to be fetched from the ledger
+        const countryAsBytes = await ctx.stub.getState(countryCode);
+        if (!countryAsBytes || countryAsBytes.length === 0) {
+            throw new Error(chalk.bgRed(`${countryAsBytes} does not exist`));
+        }
+        console.log(chalk.bgWhite(countryAsBytes.toString()));
+        return "";
+    }
 
 }
