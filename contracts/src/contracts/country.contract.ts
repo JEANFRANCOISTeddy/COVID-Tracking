@@ -1,6 +1,9 @@
 import {Context, Contract} from "fabric-contract-api";
 import { Country } from "../models/country.model";
 
+const chalk = require('chalk');
+const SHA256  = require('crypto-js/sha256');
+
 export class CountryContract extends Contract {
 
     /**
@@ -12,7 +15,7 @@ export class CountryContract extends Contract {
      * @param ctx
      */
     public async  initLedger(ctx: Context) {
-        console.info('============= START : Initialize Ledger ===========');
+        console.info(chalk.blue('============= START : Initialize Ledger ==========='));
         const countries: Country[] = [
             {
                 code: "FR",
@@ -42,19 +45,19 @@ export class CountryContract extends Contract {
 
         countries.forEach(function (country, index) {
             // Assign random id in get the number of miliseconds
-            countries[index].id = Math.floor(Math.random() * Date.now());
+            countries[index].id = SHA256(Math.floor(Math.random() * Date.now()));
             // It contains a key and value which needs to be written to the transaction's write set.
             await ctx.stub.putState('COUNTRY' + index, Buffer.from(JSON.stringify(countries[index])));
             console.info('Added <--> ', countries[index]);
         });
-        console.info('============= END : Initialize Ledger ===========');
+        console.info(chalk.blue('============= END : Initialize Ledger ==========='));
     }
 
     public async addCountry() {
-        console.info('============= START : Create Country ===========');
+        console.info(chalk.green('============= START : Create Country ==========='));
 
 
-        console.info('============= END : Create Country ===========');
+        console.info(chalk.green('============= END : Create Country ==========='));
     }
 
     /**
