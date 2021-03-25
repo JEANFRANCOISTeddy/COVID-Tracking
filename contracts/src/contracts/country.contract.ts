@@ -48,7 +48,7 @@ export class CountryContract extends Contract {
             // Assign random id by using sha256 hash function
             countries[index].id = SHA256(Math.floor(Math.random() * Date.now()));
             // It contains a key and value which needs to be written to the transaction's write set.
-            ctx.stub.putState('COUNTRY' + index, Buffer.from(JSON.stringify(countries[index])));
+            await ctx.stub.putState('COUNTRY' + index, Buffer.from(JSON.stringify(countries[index])));
             console.info('Added <--> ', countries[index]);
         });
 
@@ -89,7 +89,7 @@ export class CountryContract extends Contract {
             throw new Error(chalk.bgRed(`${countryAsBytes} does not exist`));
         }
         console.log(chalk.bgWhite(countryAsBytes.toString()));
-        return "";
+        return countryAsBytes.toString();
     }
 
 }
