@@ -4,8 +4,6 @@
 
 # eCOVID Tracking
 
-Follow-up of each COVID vaccine recipient
-
 ## Objective
 
 - Allows country to know how many citizen has been vaccinated, how many doses of each vaccine had been distributed on each vaccination point and how many already been used.
