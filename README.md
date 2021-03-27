@@ -10,3 +10,4 @@
 - Allows citizen to have an appointment to be vaccine, in registring his social security card number. He will be able to check if he's covided or not in using his social security card number.
 - Allows vaccination point to manage vaccination of citizen and attribute a doctor to a group of citizen.
 - Allows doctor to registrer his availabity hours and know in which vaccination point it will be implant.
+
