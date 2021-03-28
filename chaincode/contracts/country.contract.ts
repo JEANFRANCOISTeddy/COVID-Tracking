@@ -5,6 +5,20 @@ const chalk = require('chalk');
 
 export class CountryContract extends Contract {
 
+    static from(bufferOrJson: Buffer | JSON, props: ICountryProps) {
+        if(Buffer.isBuffer(bufferOrJson)) {
+            if(!bufferOrJson.length) {
+                return;
+            }
+            bufferOrJson = JSON.parse(bufferOrJson.toString('utf-8'));
+        }
+        return Object.assign(new Country(props), bufferOrJson);
+    }
+
+    toBuffer() {
+        return Buffer.from(JSON.stringify(this));
+    }
+
     /**
      *
      * initLedger
