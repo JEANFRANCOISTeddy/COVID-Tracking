@@ -6,7 +6,6 @@ export interface ICountryProps {
     code: string;
     name: string;
     populationSize: number;
-    transferTo?: string;
     doseStorage?: Array<object>;
     vaccinationPoint?: Array<object>;
 }
@@ -15,7 +14,6 @@ export class Country implements ICountryProps {
     code: string;
     name: string;
     populationSize: number;
-    transferTo?: string;
     doseStorage?: Array<object>;
     vaccinationPoint?: Array<object>;
 

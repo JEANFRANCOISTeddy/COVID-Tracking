@@ -4,7 +4,7 @@
   "description": "Follow-up of each COVID vaccine recipient",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node test/index.ts",
+    "start": "ts-node test/my-asset-contract.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
