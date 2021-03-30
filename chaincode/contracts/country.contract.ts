@@ -3,6 +3,7 @@ import {Country, ICountryProps} from "../models/country.model";
 import {IVaccinationPointProps} from "../models/vaccinationPoint.model";
 
 const chalk = require('chalk');
+const SHA256  = require('crypto-js/sha256');
 
 export class CountryContract extends Contract {
 
@@ -24,22 +25,47 @@ export class CountryContract extends Contract {
                 populationSize: 66_000_000,
                 doseStorage: [
                     {
+                        id: "1547899",
                         name: "Pfizer",
-                        doses: 50_000_000
+                        doses: 50_000_000,
+                        personnelSize: 2500
                     },
                     {
+                        id: "698984251",
                         name: "AstraZeneca",
-                        doses: 44_000_000
+                        doses: 44_000_000,
+                        personnelSize: 3700
                     }
                 ],
                 vaccinationPoint: [
                     {
+                        id: "8", 
                         name: "Centre Hospitalier de Saint-Denis",
                         address: "2 Rue du Dr Delafontaine",
                         postalCode: "93200",
                         city: "Saint-Denis",
-                        doses: 51_000
+                        doseStorage: [
+                            {
+                                name: "AstraZeneca",
+                                doses: 200_000
+                            }
+                        ],
+                        personnelSize: 2500,
                     },
+                    {
+                        id: "9",
+                        name: "Centre de Vaccination - Salle Olympe de Gouges",
+                        address: "15 Rue Merlin",
+                        postalCode: "75011",
+                        city: "Paris",
+                        doseStorage: [
+                            {
+                                name: "Pfizer",
+                                doses: 350_000
+                            }
+                        ],
+                        personnelSize: 7500,
+                    }
                 ]
             },
         ];
@@ -143,7 +169,7 @@ export class CountryContract extends Contract {
      * 
      * sendDoses
      * 
-     * 
+     * Check if a Country has enought doses of a specify vaccin to send send him in a vaccination point
      * 
      * @param ctx 
      * @param code 
@@ -152,6 +178,13 @@ export class CountryContract extends Contract {
     async sendDoses(ctx: Context, from: ICountryProps, to: IVaccinationPointProps, dosesToSend: number, vaccineName: string): Promise<void>{
         const countryString = await this.getCountry(ctx, from.code);
         const country = JSON.parse(countryString);
+
+        const vaccinationPointString = await this.getCountry(ctx, to.id);
+        const vaccinationPoint = JSON.parse(vaccinationPointString);
+
+        if(vaccinationPoint.name === undefined){
+            throw new Error(chalk.red(`${ vaccinationPoint.name } doesn't exist`));
+        }
 
         if(country.doseStorage === undefined){
             throw new Error(chalk.red(`${ country.name } has no vaccine.`));
@@ -172,10 +205,29 @@ export class CountryContract extends Contract {
             throw new Error(chalk.red(`${ country.name } doesn't have enough doses to send`));
         }
 
+        if(vaccinationPoint.doseStorage === undefined && vaccinationPoint.name !== undefined){
+            vaccinationPoint.doseStorage = {
+                id: SHA256(Math.floor(Math.random() * Date.now())),
+                name: vaccineName,
+                doses: dosesToSend
+            };
+            await ctx.stub.putState(vaccinationPoint.doseStorage.id, Buffer.from(JSON.stringify(vaccinationPoint)));
+        } 
+
+        if(vaccinationPoint.doseStorage !== undefined){
+            vaccinationPoint.doseStorage.doses += dosesToSend;
+            await ctx.stub.putState(vaccinationPoint.doseStorage.id, Buffer.from(JSON.stringify(vaccinationPoint)));
+        } 
         
+        country.doseStorage.vaccineDoses -= dosesToSend;
+
+        await ctx.stub.putState(from.code, Buffer.from(JSON.stringify(country)));
+        await ctx.stub.putState(to.name, Buffer.from(JSON.stringify(to)));
     }
 
     /**
+     * 
+     * Create new method toString
      * 
      * @param country 
      * @returns
