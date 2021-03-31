@@ -187,7 +187,7 @@ export class CountryContract extends Contract {
         }
 
         if(country.doseStorage === undefined){
-            throw new Error(chalk.red(`${ country.name } has no vaccine.`));
+            throw new Error(chalk.red(`${ country.name } has no vaccine`));
         }
 
         const vaccineDoses = country.doseStorage.forEach(function(element: any, index: any){
