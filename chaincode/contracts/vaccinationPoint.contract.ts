@@ -25,6 +25,7 @@ export class VaccinationPointContract extends Contract {
                 address: "2 Rue du Dr Delafontaine",
                 postalCode: "93200",
                 city: "Saint-Denis",
+                countryCode: "FR",
                 doseStorage: [
                     {
                         name: "AstraZeneca",
@@ -39,6 +40,7 @@ export class VaccinationPointContract extends Contract {
                 address: "15 Rue Merlin",
                 postalCode: "75011",
                 city: "Paris",
+                countryCode: "FR",
                 doseStorage: [
                     {
                         name: "Pfizer",
@@ -51,7 +53,6 @@ export class VaccinationPointContract extends Contract {
         
         for (const vaccinationPoint of vaccinationPoints) {
             let index = vaccinationPoints.indexOf(vaccinationPoint);
-            // It contains a key and value which needs to be written to the transaction's write set.
             await ctx.stub.putState(vaccinationPoints[index].id, Buffer.from(JSON.stringify(vaccinationPoints[index])));
             console.info('Added <--> ', vaccinationPoints[index]);
         }
@@ -73,7 +74,10 @@ export class VaccinationPointContract extends Contract {
 
         // Assign random id by using sha256 hash function
         vaccinationPoint.id = SHA256(Math.floor(Math.random() * Date.now()));
-        await ctx.stub.putState(vaccinationPoint.id, Buffer.from(JSON.stringify(vaccinationPoint)));
+        if(vaccinationPoint.id !== undefined)
+            await ctx.stub.putState(vaccinationPoint.id, Buffer.from(JSON.stringify(vaccinationPoint)));
+        else
+            throw new Error(`External error`);
 
         console.info(chalk.green('============= END : Create Country ==========='));
     }
@@ -142,13 +146,17 @@ export class VaccinationPointContract extends Contract {
         properties.push("address : " + vaccinationPoint.address);
         properties.push("postalCode : " + vaccinationPoint.postalCode);
         properties.push("city : " + vaccinationPoint.city);
+        properties.push("countryCode : " + vaccinationPoint.countryCode);
+        if(vaccinationPoint.waitingList !== undefined) {
+            properties.push("waitingList : " + vaccinationPoint.waitingList);
+        }
         if(vaccinationPoint.doseStorage !== undefined) {
             properties.push("doseStorage : " + vaccinationPoint.doseStorage);
         }
         if(vaccinationPoint.personnelSize !== undefined) {
             properties.push("personnelSize : " + vaccinationPoint.personnelSize);
         }
-        return "{ vaccinationPoint " + properties.join(", ") + " }";
+        return "{ VaccinationPoint " + properties.join(", ") + " }";
     }
 
 }

@@ -8,9 +8,10 @@ export interface ICitizenProps {
     lastName: string;
     age: number;
     gender: string;
-    nationality: string;
+    nationalityCode: string;
     covidResult?: boolean;
     register?: boolean;
+    disponibility?: string;
     vaccine?: Array<object>;
     vaccinationAvailability?: string; 
 }
@@ -21,7 +22,7 @@ export class Citizen implements ICitizenProps {
     lastName: string;
     age: number;
     gender: string;
-    nationality: string;
+    nationalityCode: string;
     
     constructor(props :ICitizenProps) {
         this.socialSecurityCardId = props.socialSecurityCardId,
@@ -29,6 +30,6 @@ export class Citizen implements ICitizenProps {
         this.lastName = props.lastName,
         this.age = props.age,
         this.gender = props.gender,
-        this.nationality = props.nationality
+        this.nationalityCode = props.nationalityCode
     }
 }

@@ -7,7 +7,9 @@ export interface IVaccinationPointProps {
     name: string;
     address: string;
     postalCode: string;
-    city: string
+    city: string;
+    countryCode: string;
+    waitingList?: Array<object>;
     doseStorage?: Array<object>;
     personnelSize?: number;
 }
@@ -17,7 +19,9 @@ export class VaccinationPoint implements IVaccinationPointProps {
     name: string;
     address: string;
     postalCode: string;
-    city: string
+    city: string;
+    countryCode: string;
+    waitingList?: Array<object>;
     doseStorage?: Array<object>;
     personnelSize?: number;
 
@@ -26,5 +30,6 @@ export class VaccinationPoint implements IVaccinationPointProps {
         this.address = props.address;
         this.postalCode = props.postalCode;
         this.city = props.city;
+        this.countryCode = props.countryCode;
     }
 }
