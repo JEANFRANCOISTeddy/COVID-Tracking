@@ -44,6 +44,7 @@ export class CountryContract extends Contract {
                         address: "2 Rue du Dr Delafontaine",
                         postalCode: "93200",
                         city: "Saint-Denis",
+                        countryCode: "FR",
                         doseStorage: [
                             {
                                 name: "AstraZeneca",
@@ -58,6 +59,7 @@ export class CountryContract extends Contract {
                         address: "15 Rue Merlin",
                         postalCode: "75011",
                         city: "Paris",
+                        countryCode: "FR",
                         doseStorage: [
                             {
                                 name: "Pfizer",
