@@ -11,7 +11,6 @@ export interface ICitizenProps {
     nationalityCode: string;
     covidResult?: boolean;
     register?: boolean;
-    disponibility?: string;
     vaccine?: Array<object>;
     vaccinationAvailability?: string; 
 }

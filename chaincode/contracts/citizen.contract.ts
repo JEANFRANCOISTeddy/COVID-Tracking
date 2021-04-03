@@ -3,7 +3,6 @@ import { IVaccinationPointProps } from "../models";
 import {Citizen, ICitizenProps} from "../models/citizen.model";
 
 const chalk = require('chalk');
-const SHA256  = require('crypto-js/sha256');
 
 export class CitizenContract extends Contract {
 
@@ -16,10 +15,28 @@ export class CitizenContract extends Contract {
      * @param ctx
      */
     public async initLedger(ctx: Context){
-        console.info(chalk.blue('============= START : Initialize Ledger ==========='));
-
         const citizens: ICitizenProps[] = [
-
+            {
+                socialSecurityCardId: "012345678910123",
+                firstName: "Omar",
+                lastName: "Sy",
+                age: 18,
+                gender: "M",
+                nationalityCode: "FR",
+                covidResult: false,
+                register: true,
+                vaccine: [
+                    {
+                        name: "AstraZeneca",
+                        date: "03/03/2021"
+                    },
+                    {
+                        name: "Pfizer",
+                        date: "03/04/2021"
+                    }
+                ],
+                vaccinationAvailability: "03/03/2021"
+            }
         ];
 
         for (const citizen of citizens) {
@@ -28,8 +45,6 @@ export class CitizenContract extends Contract {
             await ctx.stub.putState(citizens[index].socialSecurityCardId, Buffer.from(JSON.stringify(citizens[index])));
             console.info('Added <--> ', citizens[index]);
         }
-
-        console.info(chalk.blue('============= END : Initialize Ledger ==========='));
     }
 
     /**
@@ -39,14 +54,10 @@ export class CitizenContract extends Contract {
      * Add a citizen to the ledger
      *
      * @param ctx
-     * @param props - Country citizen
+     * @param citizen - Citizen object
      */
     public async addCitizen(ctx: Context, citizen: ICitizenProps): Promise<void> {
-        console.info(chalk.green('============= START : Create Country ==========='));
-
         await ctx.stub.putState(citizen.socialSecurityCardId, Buffer.from(JSON.stringify(citizen)));
-
-        console.info(chalk.green('============= END : Create Country ==========='));
     }
 
     /**
@@ -56,18 +67,13 @@ export class CitizenContract extends Contract {
     * Get citizen from chaincode state
     *
     * @param ctx
-    * @returns - citizen object converted in string
+    * @param socialSecurityCardId - Citizen card id
     */
     public async getCitizen(ctx: Context, socialSecurityCardId: string): Promise<string>{
-        console.info(chalk.green('============= START : Get citizen ==========='));
-
         const citizenJSON = await ctx.stub.getState(socialSecurityCardId);
         if (!citizenJSON || citizenJSON.length === 0) {
             throw new Error(`The citizen number ${socialSecurityCardId} does not exist`);
         }
-
-        console.info(chalk.green('============= END : Get citizen ==========='));
-
         return this.toString(citizenJSON);
     }
 
@@ -96,7 +102,7 @@ export class CitizenContract extends Contract {
      * 
      * @param ctx 
      * @param socialSecurityCardId 
-     * @returns 
+     * @returns citizen JSON Object
      */
     public async citizentExists(ctx: Context, socialSecurityCardId: string): Promise<boolean> {
         const citizenJSON = await ctx.stub.getState(socialSecurityCardId);
@@ -109,8 +115,10 @@ export class CitizenContract extends Contract {
      *
      * Sign up a citizen in a vaccination point and add him to le waiting list
      *
-     * @param  - ctx, disponibilty date in string format "yyyy-mm-dd"
-     * @returns -
+     * @param ctx
+     * @param disponibilty - disponibilty date in string format "yyyy-mm-dd"
+     * @param socialSecurityCardId 
+     * @param vaccinationPoint - vaccinationPoint object 
      */
     async signUpVaccinationPoint(ctx: Context, disponibilty: string, socialSecurityCardId: string, vaccinationPoint: IVaccinationPointProps): Promise<void> {
         const exits = await this.citizentExists(ctx, socialSecurityCardId);
@@ -126,15 +134,15 @@ export class CitizenContract extends Contract {
         }
 
         citizen.disponibility = disponibilty;
-        vaccinationPoint.waitingList?.push();
+        vaccinationPoint.waitingList?.push(citizen);
 
         await ctx.stub.putState(socialSecurityCardId, Buffer.from(JSON.stringify(citizenJSON)));
     }
 
     /**
      * 
-     * @param vaccinationPoint 
-     * @returns 
+     * @param citizen 
+     * @returns Object transform into string
      */
     async toString(citizen: any) {
         const properties: string[] = [];
