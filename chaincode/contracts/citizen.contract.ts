@@ -57,7 +57,11 @@ export class CitizenContract extends Contract {
      * @param citizen - Citizen object
      */
     public async addCitizen(ctx: Context, citizen: ICitizenProps): Promise<void> {
-        await ctx.stub.putState(citizen.socialSecurityCardId, Buffer.from(JSON.stringify(citizen)));
+        const exist = this.getCitizen(ctx, citizen.socialSecurityCardId);
+        if(exist !== undefined)
+            throw new Error(`The citizen with this number already exist`);
+        else
+            await ctx.stub.putState(citizen.socialSecurityCardId, Buffer.from(JSON.stringify(citizen)));
     }
 
     /**
