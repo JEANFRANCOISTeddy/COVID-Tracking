@@ -59,7 +59,7 @@ export class CitizenContract extends Contract {
     public async addCitizen(ctx: Context, citizen: ICitizenProps): Promise<void> {
         const exist = await this.citizentExists(ctx, citizen.socialSecurityCardId);
         if(!exist)
-            throw new Error(`The citizen with this number already exist`);
+            throw new Error(chalk.red(`The citizen with this number already exist`));
         else
             await ctx.stub.putState(citizen.socialSecurityCardId, Buffer.from(JSON.stringify(citizen)));
     }
@@ -76,7 +76,7 @@ export class CitizenContract extends Contract {
     public async getCitizen(ctx: Context, socialSecurityCardId: string): Promise<string>{
         const citizenJSON = await ctx.stub.getState(socialSecurityCardId);
         if (!citizenJSON || citizenJSON.length === 0) {
-            throw new Error(`The citizen number ${socialSecurityCardId} does not exist`);
+            throw new Error(chalk.red(`The citizen number ${socialSecurityCardId} does not exist`));
         }
         return this.toString(citizenJSON);
     }
@@ -127,14 +127,14 @@ export class CitizenContract extends Contract {
     async signUpVaccinationPoint(ctx: Context, disponibilty: string, socialSecurityCardId: string, vaccinationPoint: IVaccinationPointProps): Promise<void> {
         const exits = await this.citizentExists(ctx, socialSecurityCardId);
         if(!exits){
-            throw new Error(`The citizen number ${socialSecurityCardId} does not exist`);
+            throw new Error(chalk.red(`The citizen number ${socialSecurityCardId} does not exist`));
         }
 
         const citizenJSON = await this.getCitizen(ctx,socialSecurityCardId);
         const citizen = JSON.parse(citizenJSON);
 
         if(vaccinationPoint.countryCode !== citizen.nationalityCode) {
-            throw new Error(`The vaccination point must be in country`);
+            throw new Error(chalk.red(`The vaccination point must be in country`));
         }
 
         citizen.disponibility = disponibilty;
