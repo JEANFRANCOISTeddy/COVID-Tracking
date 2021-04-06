@@ -1,6 +1,7 @@
 import {Context, Contract} from "fabric-contract-api";
 import {Country, ICountryProps} from "../models/country.model";
 import {IVaccinationPointProps} from "../models/vaccinationPoint.model";
+import {VaccinationPointContract} from "../contracts/vaccinationPoint.contract"
 
 const chalk = require('chalk');
 const SHA256  = require('crypto-js/sha256');
@@ -16,8 +17,6 @@ export class CountryContract extends Contract {
      * @param ctx
      */
     public async initLedger(ctx: Context){
-        console.info(chalk.blue('============= START : Initialize Ledger ==========='));
-
         const countries: ICountryProps[] = [
             {
                 code: "FR",
@@ -78,8 +77,6 @@ export class CountryContract extends Contract {
             await ctx.stub.putState(countries[index].code, Buffer.from(JSON.stringify(countries[index])));
             console.info('Added <--> ', countries[index]);
         }
-
-        console.info(chalk.blue('============= END : Initialize Ledger ==========='));
     }
 
     /**
@@ -89,14 +86,14 @@ export class CountryContract extends Contract {
      * Add a country to the ledger
      *
      * @param ctx
-     * @param props - Country object
+     * @param country - Country object
      */
     public async addCountry(ctx: Context, country: ICountryProps): Promise<void> {
-        console.info(chalk.green('============= START : Create Country ==========='));
-
-        await ctx.stub.putState(country.code, Buffer.from(JSON.stringify(country)));
-
-        console.info(chalk.green('============= END : Create Country ==========='));
+        const exist = await this.countryExists(ctx, country.code);
+        if(!exist)
+            throw new Error(`A country with this code already exist`);
+        else
+            await ctx.stub.putState(country.code, Buffer.from(JSON.stringify(country)));
     }
 
     /**
@@ -106,18 +103,14 @@ export class CountryContract extends Contract {
      * Get country from chaincode state
      *
      * @param ctx
+     * @param code - allow to check if a country exist
      * @returns - country object converted in string
      */
     public async getCountry(ctx: Context, code: string): Promise<string>{
-        console.info(chalk.green('============= START : Get Country ==========='));
-
         const countryJSON = await ctx.stub.getState(code);
         if (!countryJSON || countryJSON.length === 0) {
             throw new Error(`The country ${code} does not exist`);
         }
-
-        console.info(chalk.green('============= END : Get Country ==========='));
-
         return this.toString(countryJSON);
     }
 
@@ -128,12 +121,10 @@ export class CountryContract extends Contract {
      * Update an existing country in the world state with provided parameters.
      * 
      * @param ctx 
-     * @param country 
+     * @param country - Country Object
      * @returns 
      */
     public async updateCountry(ctx: Context, country: ICountryProps): Promise<void> {
-        console.info(chalk.green('============= START : Country update ==========='));
-
         const exists = await this.countryExists(ctx, country.code);
         if (!exists) {
             throw new Error(`The country ${country.code} does not exist`);
@@ -146,10 +137,7 @@ export class CountryContract extends Contract {
             doseStorage: country.doseStorage,
             vaccinationPoint: country.vaccinationPoint
         };
-
-        console.info(chalk.green('============= END : Country update ==========='));
-
-        return ctx.stub.putState(country.code, Buffer.from(JSON.stringify(updatedCountry)));
+        await ctx.stub.putState(country.code, Buffer.from(JSON.stringify(updatedCountry)));
     }
 
     /**
@@ -174,19 +162,25 @@ export class CountryContract extends Contract {
      * Check if a Country has enought doses of a specify vaccin to send send him in a vaccination point
      * 
      * @param ctx 
-     * @param code 
-     * @param to 
+     * @param from - contry which will send the doses
+     * @param to - vaccinationPoint which will receive the doses
+     * @param dosesToSend - Number of doses
+     * @param vaccineName - Name of the vaccine that you want to send 
      */
     async sendDoses(ctx: Context, from: ICountryProps, to: IVaccinationPointProps, dosesToSend: number, vaccineName: string): Promise<void>{
+        const countryExist = await this.countryExists(ctx, from.code);
+        if(!countryExist) 
+            throw new Error(chalk.red(`This country doesn't exist`));
+
         const countryString = await this.getCountry(ctx, from.code);
         const country = JSON.parse(countryString);
 
+        const vaccinationPointExist = await VaccinationPointContract.vaccinationPointExists(ctx,to.id);
+        if(!vaccinationPointExist) 
+            throw new Error(chalk.red(`This vaccination point doesn't exist`));
+
         const vaccinationPointString = await this.getCountry(ctx, to.id);
         const vaccinationPoint = JSON.parse(vaccinationPointString);
-
-        if(vaccinationPoint.name === undefined){
-            throw new Error(chalk.red(`${ vaccinationPoint.name } doesn't exist`));
-        }
 
         if(country.doseStorage === undefined){
             throw new Error(chalk.red(`${ country.name } has no vaccine`));
@@ -199,7 +193,7 @@ export class CountryContract extends Contract {
             return undefined;
         })
 
-        if(vaccineDoses == undefined) {
+        if(vaccineDoses === undefined) {
             throw new Error(chalk.red(`The vaccine ${ vaccineName } doesn't exist in your contry`));
         }
 
@@ -207,9 +201,8 @@ export class CountryContract extends Contract {
             throw new Error(chalk.red(`${ country.name } doesn't have enough doses to send`));
         }
 
-        if(vaccinationPoint.doseStorage === undefined && vaccinationPoint.name !== undefined){
+        if(vaccinationPoint.doseStorage === undefined){
             vaccinationPoint.doseStorage = {
-                id: SHA256(Math.floor(Math.random() * Date.now())),
                 name: vaccineName,
                 doses: dosesToSend
             };
@@ -232,7 +225,7 @@ export class CountryContract extends Contract {
      * Create new method toString
      * 
      * @param country 
-     * @returns
+     * @returns Contry object transform in string
      */
     async toString(country: any) {
         const properties: string[] = [];
