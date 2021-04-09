@@ -1,10 +1,9 @@
 import {Context, Contract} from "fabric-contract-api";
-import {Country, ICountryProps} from "../models/country.model";
+import {ICountryProps} from "../models/country.model";
 import {IVaccinationPointProps} from "../models/vaccinationPoint.model";
 import {VaccinationPointContract} from "../contracts/vaccinationPoint.contract"
 
 const chalk = require('chalk');
-const SHA256  = require('crypto-js/sha256');
 
 export class CountryContract extends Contract {
 
@@ -209,7 +208,7 @@ export class CountryContract extends Contract {
             await ctx.stub.putState(vaccinationPoint.doseStorage.id, Buffer.from(JSON.stringify(vaccinationPoint)));
         } 
 
-        if(vaccinationPoint.doseStorage !== undefined){
+        if(vaccinationPoint.doseStorage){
             vaccinationPoint.doseStorage.doses += dosesToSend;
             await ctx.stub.putState(vaccinationPoint.doseStorage.id, Buffer.from(JSON.stringify(vaccinationPoint)));
         } 
