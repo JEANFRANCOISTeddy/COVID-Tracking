@@ -6,6 +6,8 @@ import { ICitizenProps } from "./citizen.model";
 
 export interface IDoctorProps extends ICitizenProps {
     nationalityCode: string;
+    disponibilityStart: string;
+    disponibilityEnd: string;
 }
 
 export class Doctor implements IDoctorProps{
