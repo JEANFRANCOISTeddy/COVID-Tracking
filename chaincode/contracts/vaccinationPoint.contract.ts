@@ -16,8 +16,6 @@ export class VaccinationPointContract extends Contract {
      * @param ctx
      */
     public async initLedger(ctx: Context) {
-        console.info(chalk.blue('============= START : Initialize Ledger ==========='));
-
         const vaccinationPoints: IVaccinationPointProps[] = [
             {
                 id: "8",
@@ -67,19 +65,15 @@ export class VaccinationPointContract extends Contract {
      * Add a vaccinationPoint to the ledger
      *
      * @param ctx
-     * @param props - Country object
+     * @param vaccinationPoint - Country object
      */
     public async addVaccinationPoint(ctx: Context, vaccinationPoint: IVaccinationPointProps): Promise<void> {
-        console.info(chalk.green('============= START : Create Country ==========='));
+        const exist = VaccinationPointContract.vaccinationPointExists(ctx, vaccinationPoint.id);
+        if(!exist)
+            throw new Error(chalk.red(`This vaccination point already exist`));
 
-        // Assign random id by using sha256 hash function
-        vaccinationPoint.id = SHA256(Math.floor(Math.random() * Date.now()));
         if(vaccinationPoint.id !== undefined)
             await ctx.stub.putState(vaccinationPoint.id, Buffer.from(JSON.stringify(vaccinationPoint)));
-        else
-            throw new Error(`External error`);
-
-        console.info(chalk.green('============= END : Create Country ==========='));
     }
 
     /**
@@ -88,19 +82,15 @@ export class VaccinationPointContract extends Contract {
      *
      * Get vaccinationPoint from chaincode state
      *
-     * @param ctx, id
+     * @param ctx
+     * @param id
      * @returns - vaccinationPoint object converted in string
      */
     public async getVaccinationPoint(ctx: Context, id: string): Promise<string>{
-        console.info(chalk.green('============= START : Get Country ==========='));
-
         const vaccinationPointJSON = await ctx.stub.getState(id);
         if (!vaccinationPointJSON || vaccinationPointJSON.length === 0) {
             throw new Error(`The vaccinationPoint ${id} does not exist`);
         }
-
-        console.info(chalk.green('============= END : Get Country ==========='));
-
         return this.toString(vaccinationPointJSON);
     }
 
@@ -114,9 +104,28 @@ export class VaccinationPointContract extends Contract {
      * @param id 
      * @returns 
      */
-    public async vaccinationPointExists(ctx: Context, id: string): Promise<boolean> {
+    public static async vaccinationPointExists(ctx: Context, id: string): Promise<boolean> {
         const vaccinationPointJSON = await ctx.stub.getState(id);
         return vaccinationPointJSON && vaccinationPointJSON.length > 0;
+    }
+
+    /**
+     *
+     * showCitizenResult
+     *
+     * Allow people to show his covid result
+     *
+     * @param ctx
+     * @param socialSecurityCardId
+     */
+    public async showCitizenResult(ctx: Context, socialSecurityCardId: string): Promise<string> {
+        const citizenJSON = await ctx.stub.getState(socialSecurityCardId);
+        if(!citizenJSON) {
+            throw new Error(chalk.red(`The citizen doesn't exist`));
+        }
+
+        const citizen = JSON.parse(citizenJSON.toString());
+        return citizen.result;
     }
 
     /**
@@ -125,7 +134,9 @@ export class VaccinationPointContract extends Contract {
      * 
      * Assign an available doctor to do a vaccination for a citizen or a group of citizen
      * 
-     * @param  ctx, doctor, citizen
+     * @param ctx
+     * @param doctor
+     * @param citizen
      * @returns 
      */
     public async assignDoctorToCitizen(ctx: Context, doctor: IDoctorProps, citizen: ICitizenProps ){
