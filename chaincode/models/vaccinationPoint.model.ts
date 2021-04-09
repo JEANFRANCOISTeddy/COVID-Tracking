@@ -3,7 +3,7 @@
  */
 
 export interface IVaccinationPointProps {
-    id?: string;
+    id: string;
     name: string;
     address: string;
     postalCode: string;
@@ -15,7 +15,7 @@ export interface IVaccinationPointProps {
 }
 
 export class VaccinationPoint implements IVaccinationPointProps {
-    id?: string;
+    id: string;
     name: string;
     address: string;
     postalCode: string;
@@ -26,6 +26,7 @@ export class VaccinationPoint implements IVaccinationPointProps {
     personnelSize?: number;
 
     constructor(props: IVaccinationPointProps) {
+        this.id = props.id;
         this.name = props.name;
         this.address = props.address;
         this.postalCode = props.postalCode;
