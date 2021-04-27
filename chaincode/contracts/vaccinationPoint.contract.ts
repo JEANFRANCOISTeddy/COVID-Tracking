@@ -1,6 +1,8 @@
 import {Context, Contract} from "fabric-contract-api";
 import { ICitizenProps, IDoctorProps } from "../models";
 import {VaccinationPoint, IVaccinationPointProps} from "../models/vaccinationPoint.model";
+import {DoctorContract} from "./doctor.contract";
+import {CitizenContract} from "./citizen.contract";
 
 const chalk = require('chalk');
 const SHA256  = require('crypto-js/sha256');
@@ -137,10 +139,46 @@ export class VaccinationPointContract extends Contract {
      * @param ctx
      * @param doctor
      * @param citizen
+     * @param vaccinationPoint
      * @returns 
      */
-    public async assignDoctorToCitizen(ctx: Context, doctor: IDoctorProps, citizen: ICitizenProps ){
-        
+    public async assignDoctorToCitizen(ctx: Context, doctor: IDoctorProps, citizen: ICitizenProps, vaccinationPoint: IVaccinationPointProps ): Promise<string>{
+        var firstCitizen;
+        const doctorExists = await DoctorContract.doctorExists(ctx, doctor.socialSecurityCardId);
+        if(!doctorExists) {
+            throw new Error(chalk.red(`The doctor doesn't exist`));
+        }
+
+        const citizenExists = await CitizenContract.citizenExists(ctx, citizen.socialSecurityCardId);
+        if(!citizenExists) {
+            throw new Error(chalk.red(`The citizen doesn't exist`));
+        }
+
+        const doctorJSON = await ctx.stub.getState(doctor.socialSecurityCardId);
+        const citizenJSON = await ctx.stub.getState(citizen.socialSecurityCardId);
+
+        if(vaccinationPoint.waitingList === undefined){
+            throw new Error(chalk.red(`External error`));
+        }
+
+        if(citizen.vaccinationAvailability === undefined){
+            throw new Error(chalk.red(`The citizen didn't specify a vaccination availability`));
+        }
+
+        if(doctor.disponibilityStart >= citizen.vaccinationAvailability || doctor.disponibilityEnd <= citizen.vaccinationAvailability){
+            throw new Error(chalk.red(`No doctors available`));
+        }
+
+        if(vaccinationPoint.waitingList[0] === undefined){
+            firstCitizen = vaccinationPoint.waitingList[0];
+        }else{
+            vaccinationPoint.waitingList.push(citizen);
+        }
+
+        if(firstCitizen) 
+            return "You should be call soon to pass your vaccine";
+
+        return "You have been put on the waiting list, you should be call soon to pass your vaccine";
     }
 
     /**

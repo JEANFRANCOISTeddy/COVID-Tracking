@@ -54,7 +54,7 @@ export class DoctorContract extends Contract {
     * @param doctor - Doctor object
     */
     public async addDoctor(ctx: Context, doctor: IDoctorProps): Promise<void> {
-        const exist = await this.doctorExists(ctx, doctor.socialSecurityCardId);
+        const exist = await DoctorContract.doctorExists(ctx, doctor.socialSecurityCardId);
         if(!exist)
             throw new Error(chalk.red(`The citizen with this number already exist`));
         else
@@ -104,7 +104,7 @@ export class DoctorContract extends Contract {
      * @param socialSecurityCardId
      * @returns doctor JSON Object
      */
-    public async doctorExists(ctx: Context, socialSecurityCardId: string): Promise<boolean> {
+    public static async doctorExists(ctx: Context, socialSecurityCardId: string): Promise<boolean> {
         const doctorJSON = await ctx.stub.getState(socialSecurityCardId);
         return doctorJSON && doctorJSON.length > 0;
     }
@@ -122,7 +122,7 @@ export class DoctorContract extends Contract {
      * @returns -
      */
     async validateCovidResult(ctx: Context, socialSecurityCardId: string, result: boolean): Promise<void> {
-        const exist = await CitizenContract.citizentExists(ctx,socialSecurityCardId);
+        const exist = await CitizenContract.citizenExists(ctx,socialSecurityCardId);
         if(!exist){
             throw new Error(chalk.red(`The citizen doesn't exist`));
         }
